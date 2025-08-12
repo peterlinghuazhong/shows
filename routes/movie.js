@@ -76,7 +76,7 @@ router.post("/", async (req, res) => {
     }
 
     // create new movie
-    const newMovie = new Moviiiiiiiiie({
+    const newMovie = new Movie({
       title: title,
       director: director,
       release_year: release_year,
@@ -86,14 +86,59 @@ router.post("/", async (req, res) => {
     // save the new movie into mongodb
     await newMovie.save(); // clicking the "save" button
 
-    res.send(newMovie);
+    res.status(200).send(newMovie);
   } catch (error) {
     res.status(400).send({ message: "Unknown error" });
   }
 });
 
 //  PUT /movies/68943cf564aa9f8354cef260 - update movie
+router.put("/:id", async (req, res) => {
+  try {
+    const id = req.params.id; // id of the movie
+    const title = req.body.title;
+    const director = req.body.director;
+    const release_year = req.body.release_year;
+    const genre = req.body.genre;
+    const rating = req.body.rating;
+
+    // check error - make sure all the fields are not empty
+    if (!title || !director || !release_year || !genre || !rating) {
+      return res.status(400).send({
+        message: "All the fields are required",
+      });
+    }
+
+    const updatedMovie = await Movie.findByIdAndUpdate(
+      id,
+      {
+        title: title,
+        director: director,
+        release_year: release_year,
+        genre: genre,
+        rating: rating,
+      },
+      {
+        new: true, // return the updated data
+      }
+    );
+
+    res.status(200).send(updatedMovie);
+  } catch (error) {
+    res.status(400).send({ message: "Unknown error" });
+  }
+});
 
 //  DELETE /movies/68943cf564aa9f8354cef260 - delete movie
-
+router.delete("/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    await Movie.findByIdAndDelete(id);
+    res.status(200).send({
+      message: `Movie with the ID of ${id} has been deleted`,
+    });
+  } catch (error) {
+    res.status(400).send({ message: "Unknown error" });
+  }
+});
 module.exports = router;
